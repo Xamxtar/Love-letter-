@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Love Letter For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#ffd6e7;--bg2:#e6d4ff;--ink:#7a2e4d;--paper:#fff8ee;--btn:#e8527a;--hint:#7a2e4d;
+--w:min(46vw,340px);--h:calc(var(--w)*1.45);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#3a1030;--bg2:#1c1442;--hint:#ffd6e7}}
+:root[data-theme="dark"]{--bg1:#3a1030;--bg2:#1c1442;--hint:#ffd6e7}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(135deg,var(--bg1),var(--bg2));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;overflow:hidden;font-family:'Caveat','Segoe Script',cursive;color:var(--ink)}
+.hb{position:fixed;bottom:-40px;left:var(--x);font-size:var(--s);color:var(--c);opacity:0;animation:rise var(--d) linear infinite;animation-delay:var(--l);pointer-events:none}
+@keyframes rise{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:.7}100%{transform:translateY(-110vh) rotate(40deg);opacity:0}}
+.scene{perspective:2200px;position:relative;z-index:2}
+.book{position:relative;width:calc(var(--w)*2);height:var(--h);transform-style:preserve-3d;transform:translateX(calc(var(--w)*-.5)) rotateX(8deg);transition:transform 1.2s ease;filter:drop-shadow(0 25px 25px rgba(90,20,60,.35))}
+.book.open{transform:rotateX(8deg)}
+.sheet{position:absolute;left:50%;top:0;width:var(--w);height:var(--h);transform-origin:left center;transform-style:preserve-3d;transition:transform 1.4s cubic-bezier(.645,.045,.355,1);cursor:pointer}
+.sheet.flipped{transform:rotateY(-180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;border-radius:2px 10px 10px 2px;background:linear-gradient(90deg,rgba(120,40,70,.25),transparent 9%),var(--paper)}
+.back{transform:rotateY(180deg);border-radius:10px 2px 2px 10px;background:linear-gradient(270deg,rgba(120,40,70,.25),transparent 9%),var(--paper)}
+.face::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(60,10,40,.55),rgba(255,255,255,.25) 60%,transparent);opacity:0;pointer-events:none}
+.turning .face::after{animation:shade 1.4s ease}
+@keyframes shade{0%,100%{opacity:0}45%{opacity:.7}}
+.face svg.art{position:absolute;inset:0;width:100%;height:100%}
+.letter .txt{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:calc(var(--w)*.064);line-height:1.75;font-weight:600;text-align:center;padding:0 8%}
+.letter p{margin:0;white-space:nowrap;opacity:0;transform:translateY(8px);transition:opacity .6s,transform .6s}
+.cur .letter p{opacity:1;transform:none;transition-delay:calc(var(--i)*.28s + .9s)}
+.pn{position:absolute;bottom:3%;width:100%;text-align:center;font-style:normal;font-size:calc(var(--w)*.05);color:#e8527a}
+.hd{position:absolute;top:5%;width:100%;text-align:center;font-family:'Great Vibes','Brush Script MT',cursive;font-size:calc(var(--w)*.11);color:#c2185b;line-height:1}
+.cover{background:linear-gradient(135deg,#c2185b,#7b1fa2 60%,#4a148c);color:#ffe08a;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:4px 14px 14px 4px}
+.cover h1{font-family:'Great Vibes','Brush Script MT',cursive;font-weight:400;font-size:calc(var(--w)*.17);margin:calc(var(--w)*.04) 0 0;text-shadow:0 2px 6px rgba(0,0,0,.4);line-height:1.1}
+.cover small{font-size:calc(var(--w)*.065);color:#ffd6e7;margin-top:calc(var(--w)*.06)}
+.end{display:flex;align-items:flex-end;justify-content:center}
+.end h2{position:relative;font-family:'Great Vibes','Brush Script MT',cursive;font-weight:400;font-size:calc(var(--w)*.17);margin:0 0 18%;color:#c2185b;text-align:center;line-height:1.1}
+.nav{display:flex;align-items:center;gap:18px;z-index:3;color:var(--hint);font-size:20px}
+.nav button{width:46px;height:46px;border-radius:50%;border:0;background:var(--btn);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 12px rgba(200,40,100,.4);transition:transform .2s}
+.nav button:active{transform:scale(.9)}
+.nav button:disabled{opacity:.35}
+</style>
+</head>
+<body>
+<div class="scene"><div class="book" id="book"></div></div>
+<div class="nav"><button id="pv" aria-label="Previous page">‹</button><span id="hint">Tap the cover to open ♥</span><button id="nx" aria-label="Next page">›</button></div>
+<script>
+const heart=(x,y,s,c)=>`<path transform="translate(${x} ${y}) scale(${s})" fill="${c}" d="M0-8C-14-24-36-6 0 22 36-6 14-24 0-8Z"/>`;
+const flower=(x,y,r,a,b)=>{let s='';for(let i=0;i<8;i++)s+=`<ellipse cx="${x}" cy="${y-r*.55}" rx="${r*.33}" ry="${r*.55}" fill="${a}" opacity=".88" transform="rotate(${i*45} ${x} ${y})"/>`;return s+`<circle cx="${x}" cy="${y}" r="${r*.3}" fill="${b}"/><circle cx="${x}" cy="${y}" r="${r*.13}" fill="#ffe08a"/>`};
+const PAL=[['#ff5c8a','#c2185b','#ff9ec0'],['#b57bff','#6a2fb8','#ff8ad8'],['#ffa24c','#e0561d','#ffd166'],['#4fc3f7','#1e6fb8','#7ee0c3'],['#ff6f91','#d81b60','#ffb3c6'],['#ff5c8a','#c2185b','#ffd166']];
+const leaf=(x,y,r)=>`<ellipse cx="${x}" cy="${y}" rx="7" ry="16" fill="#4caf6a" transform="rotate(${r} ${x} ${y})"/>`;
+function art(i){const p=PAL[i%PAL.length];let s=`<svg class="art" viewBox="0 0 200 290" aria-hidden="true"><rect width="200" height="290" fill="${p[2]}" opacity=".22"/>`;
+s+=`<g stroke="#3f9b5a" stroke-width="3" fill="none" stroke-linecap="round"><path d="M100 158C100 205 88 245 100 290"/><path d="M55 196C60 230 70 255 80 290"/><path d="M148 203C145 235 130 260 120 290"/></g>`;
+s+=leaf(86,230,-50)+leaf(114,245,50)+leaf(68,250,-30)+leaf(132,255,35);
+s+=flower(100,120,40,p[0],p[1])+flower(52,176,27,p[2],p[1])+flower(150,181,29,p[0],p[1]);
+s+=heart(100,42,2.1,p[1])+heart(34,70,.8,p[0])+heart(168,76,.9,p[2])+heart(22,130,.5,p[1])+heart(180,140,.55,p[0]);
+[[30,30],[170,28],[20,100],[182,105],[60,48],[142,52]].forEach(([x,y],k)=>s+=`<path transform="translate(${x} ${y}) scale(${.6+k%3*.3})" fill="#ffd166" d="M0-8L2-2 8 0 2 2 0 8-2 2-8 0-2-2Z"/>`);
+return s+'</svg>'}
+const corner=`<svg class="art" viewBox="0 0 200 290" aria-hidden="true"><path d="M200 0C170 10 150 30 142 62M0 290C30 280 50 260 58 228" stroke="#3f9b5a" stroke-width="2.5" fill="none"/>${flower(176,26,18,'#ff7aa8','#c2185b')}${flower(24,264,18,'#b57bff','#6a2fb8')}${flower(150,60,9,'#ffa24c','#e0561d')}${flower(50,230,9,'#4fc3f7','#1e6fb8')}${leaf(158,42,40)}${leaf(42,248,-140)}</svg>`;
+const L=[
+["My dearest Tenshi,","From the very first moment","your smile found me,","my whole world began","to glow in softer colours.","Every day with you","feels like a gentle sunrise."],
+["You are the laughter","in my quietest mornings,","the warmth in my coldest days,","and the sweetest reason","my heart beats a little faster.","Loving you feels like","coming home to myself."],
+["I love the way you care,","the way your eyes light up,","the way you turn ordinary","moments into memories","I hold like pressed flowers,","soft, precious, and","forever blooming in me."],
+["Whenever the world feels loud,","your hand becomes my calm.","With you, I am braver,","kinder, and happier","than I ever knew I could be.","Thank you for being my","safe place and my adventure."],
+["If I could write the stars,","I would spell your name.","I choose you today,","tomorrow, and always.","You are my forever,","my favourite everything.","Yours endlessly, ♥"]];
+const book=document.getElementById('book'),N=7;let sheets=[],p=0,busy=false;
+const heartBig=`<svg width="40%" viewBox="-40 -30 80 60"><path fill="#ffd166" d="M0-8C-14-24-36-6 0 22 36-6 14-24 0-8Z"/><path fill="#ff5c8a" transform="scale(.75)" d="M0-8C-14-24-36-6 0 22 36-6 14-24 0-8Z"/></svg>`;
+for(let i=0;i<N;i++){const s=document.createElement('div');s.className='sheet';let f,b='';
+ if(i===0){f=`<div class="face cover">${heartBig}<h1>For Isioma</h1><small>my Tenshi, my love ♥</small></div>`;b=`<div class="face back">${art(0)}</div>`}
+ else if(i<6){f=`<div class="face letter">${corner}<div class="hd">Isioma ♥ Tenshi</div><div class="txt">${L[i-1].map((t,k)=>`<p style="--i:${k}">${t}</p>`).join('')}</div><i class="pn">♥ ${i} ♥</i></div>`;b=`<div class="face back">${art(i)}</div>`}
+ else{f=`<div class="face end">${art(5)}<h2>Forever yours</h2></div>`}
+ s.innerHTML=f+b;s.onclick=()=>turn(s.classList.contains('flipped')?-1:1);book.appendChild(s);sheets.push(s)}
+function layer(){sheets.forEach((s,i)=>{if(!s.dataset.t)s.style.zIndex=i<p?i+1:N-i})}
+function turn(d){if(busy||(d>0&&p>=N-1)||(d<0&&p<=0))return;busy=true;
+ const i=d>0?p:p-1,s=sheets[i];p+=d;s.dataset.t=1;s.style.zIndex=100;
+ s.classList.add('turning');s.classList.toggle('flipped',d>0);
+ sheets.forEach((x,k)=>x.classList.toggle('cur',k===p&&p>0));
+ book.classList.toggle('open',p>0);
+ hint.textContent=p===0?'Tap the cover to open ♥':p>=N-1?'With all my love ♥':'Letter '+Math.min(p,5)+' of 5';
+ pv.disabled=p===0;nx.disabled=p>=N-1;
+ setTimeout(()=>{delete s.dataset.t;layer()},700);
+ setTimeout(()=>{s.classList.remove('turning');busy=false},1450)}
+const hint=document.getElementById('hint'),pv=document.getElementById('pv'),nx=document.getElementById('nx');
+pv.onclick=()=>turn(-1);nx.onclick=()=>turn(1);pv.disabled=true;layer();
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')turn(1);if(e.key==='ArrowLeft')turn(-1)});
+const cols=['#ff5c8a','#c2185b','#b57bff','#ffa24c','#ff9ec0'];
+for(let i=0;i<18;i++){const h=document.createElement('span');h.className='hb';h.textContent='♥';
+ h.style.cssText=`--x:${Math.random()*100}%;--s:${12+Math.random()*22}px;--c:${cols[i%5]};--d:${8+Math.random()*8}s;--l:${-Math.random()*14}s`;document.body.appendChild(h)}
+</script>
+</body>
+</html>
